@@ -1,0 +1,35 @@
+version: '3.8'
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.10.1
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false # Désactiver la sécurité pour le développement
+      - xpack.security.http.ssl.enabled=false # Désactiver HTTPS
+      - ES_JAVA_OPTS=-Xmx2g -Xms2g # Limiter la mémoire utilisée par Elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - es-network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.10.1
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200 # Lien vers Elasticsearch
+    ports:
+      - "5601:5601" # Port d'accès à Kibana
+    networks:
+      - es-network
+
+volumes:
+  elasticsearch_data:
+    driver: local
+
+networks:
+  es-network:
+    driver: bridge
